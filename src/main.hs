@@ -2,7 +2,7 @@
 
 module Main where
 
-import Interprete
+import Exercises
 
 main :: IO ()
-main = putStrLn . show  $ maxArgs program
+main = print 1

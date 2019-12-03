@@ -56,9 +56,7 @@ parse ( CompoundStm a b)  =  parse a ++ parse b
 parse (AssignStm _ e) = parseE e
 parse (PrintStm x) =  [PrintStm x]  ++  concat (map parseE x)
 
--- table interpretations
-test = interpStm program []
-
+-- table interpretations, pure version w/o print
 interpStm :: Statement -> Table -> Table
 interpStm ( CompoundStm a b) t = interpStm b (interpStm a t)
 interpStm (AssignStm id e) t = (id, k) : t
@@ -78,3 +76,5 @@ interpExp (OpExp a op b) t =
     (i, t1) =  interpExp a t
     (j, t2) =  interpExp b t1
 interpExp (EseqExp s e) t = interpExp e (interpStm s t)
+
+test = interpStm program []
