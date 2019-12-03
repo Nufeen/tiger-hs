@@ -2,12 +2,17 @@
 
 -- https://www.cs.princeton.edu/~appel/modern/ml/chap1/
 
-module Interprete  where
+module Interprete where
 
-
-
+import Data.List (find)
+import Data.Maybe (fromJust)
 
 type Id = String
+
+type  Table = [(Id, Int)]
+
+lookup' :: Id  -> Table -> Int
+lookup' id = fromJust . lookup id
 
 data BinOp = Plus | Minus | Times | Divide
               deriving Show
@@ -23,7 +28,7 @@ data Expression = IdExp Id
                 | EseqExp Statement Expression
               deriving Show
 
-
+-- test program:
 -- a := 5 + 3 ;
 -- b := ( print ( a, a - 1) , 10 * a) ;
 -- print (b)
@@ -50,4 +55,26 @@ parse :: Statement ->  [Statement]
 parse ( CompoundStm a b)  =  parse a ++ parse b
 parse (AssignStm _ e) = parseE e
 parse (PrintStm x) =  [PrintStm x]  ++  concat (map parseE x)
-parse _ = []
+
+-- table interpretations
+test = interpStm program []
+
+interpStm :: Statement -> Table -> Table
+interpStm ( CompoundStm a b) t = interpStm b (interpStm a t)
+interpStm (AssignStm id e) t = (id, k) : t
+  where (k, _) = interpExp e t
+interpStm  (PrintStm _) t = t
+
+interpExp :: Expression -> Table -> (Int , Table)
+interpExp (IdExp id) t = (lookup' id t, t)
+interpExp (NumExp n) t = (n, t)
+interpExp (OpExp a op b) t =
+  case op of
+    Plus -> (i + j, t2)
+    Minus -> (i - j, t2)
+    Times -> (i * j, t2)
+    Divide -> (i `div` j, t2)
+  where
+    (i, t1) =  interpExp a t
+    (j, t2) =  interpExp b t1
+interpExp (EseqExp s e) t = interpExp e (interpStm s t)
