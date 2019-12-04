@@ -2,7 +2,14 @@
 
 module Main where
 
-import Exercises
+import System.Environment
+import Lexer
 
 main :: IO ()
-main = print 1
+main = do
+  [file, _] <- getArgs
+  fileContent <- readFile file
+  print file
+
+-- compile file = do
+  -- print $ lexer file
