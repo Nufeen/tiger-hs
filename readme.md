@@ -54,3 +54,5 @@ http://hackage.haskell.org/package/lexer-applicative-2.1.0.2/docs/Language-Lexer
 Uses https://github.com/feuerbach/regex-applicative that seems to be slower
 
 *For common tasks, this package is several times slower than monadic parser combinator libraries like parsec.*
+
+https://github.com/feuerbach/regex-applicative/wiki/Examples

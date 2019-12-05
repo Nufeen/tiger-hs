@@ -11,7 +11,8 @@ import Control.Exception (try)
 import Language.Lexer.Applicative
 import Text.Regex.Applicative (RE)
 import Text.Regex.Applicative (psym, some, many, anySym, (<|>))
-import Data.Char (isSpace, isDigit, isLetter)
+import Data.Char (isSpace, isDigit, isLetter, isAlphaNum)
+import Data.List
 
 data Token =
     TokenWHILE
@@ -54,12 +55,13 @@ data Token =
   | TokenAND
   | TokenOR
   | TokenASSIGN
-  | TokenSTRING
-  | TokenINT
+  | TokenSTRING String
+  | TokenINT Int
+  | TokenID String
   deriving (Eq, Show)
 
-tigerToken :: RE Char Token
-tigerToken =
+lexeme :: RE Char Token
+lexeme =
       TokenWHILE      <$ "while"
   <|> TokenFOR        <$ "for"
   <|> TokenTO         <$ "to"
@@ -100,12 +102,27 @@ tigerToken =
   <|> TokenAND        <$ "&"
   <|> TokenOR         <$ "|"
   <|> TokenASSIGN     <$ ":="
-  <|> TokenSTRING     <$ (some $ psym isLetter)
-  <|> TokenINT        <$ (some $ psym isDigit)
+  <|> TokenID         <$> tigerID
+  <|> TokenINT        <$> tigerINT
+  <|> TokenSTRING     <$> tigerSTR
+
+tigerSTR :: RE Char String
+tigerSTR = concat <$> sequenceA [ q, str, q ]
+  where
+    str = many anySym
+    q = "\""
+
+tigerINT :: RE Char Int
+tigerINT = fmap read $ some $ psym isDigit
+
+tigerID :: RE Char String
+tigerID = (:) <$> psym isValidChar <*> many (psym isAlphaNum)
+  where
+    isValidChar x = (isLetter x) || (x == '_')
 
 lexer :: Lexer Token
 lexer = mconcat
-  [ token      (longest tigerToken)
+  [ token      (longest lexeme)
   , whitespace (longest $ psym isSpace)
   , whitespace (longestShortest commentPrefix commentSuffix)
   ]
@@ -116,23 +133,20 @@ commentPrefix = "/*"
 commentSuffix :: String -> RE Char String
 commentSuffix _ = many anySym *> "*/"
 
-tryL :: IO a -> IO (Either LexicalError a)
-tryL = try
-
 test :: IO ()
 test = do
   dir <- listDirectory "testcases"
-  let files = filter (\x -> head x /= '.') dir
+  let files =
+        sortOn (\x -> read $ (filter isDigit x) :: Int) $
+        filter (\x -> head x /= '.') $ dir
   mapM_ lex files
   where
+    tryL = try :: IO a -> IO (Either LexicalError a)
     lex file = do
       fileContent <- readFile $ "testcases" ++ "/" ++ file
       putStrLn $ color Yellow file
       res <-
-        tryL $
-        putStrLn $
-        show $
-        streamToList $
+        (tryL .  putStrLn .  show .  streamToList) $
         runLexer lexer file fileContent
       case res of
         Left e -> putStrLn $ color Red $ "\n" ++ (show e) ++ "\n"
