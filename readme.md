@@ -17,15 +17,17 @@ Testcases:
 wget -r 1 -A 'test*.tig' https://www.cs.princeton.edu/~appel/modern/testcases/
 ```
 
+
 ## Lexer
 
-To check the lexer outut on testcases run in nixshell:
+To check the lexer output on testcases run in nixshell:
 
 ```
 cabal run tests.lexer
 ```
 
 Possible approaches for Haskell implementation:
+
 
 ### Alex (platform part) way:
 
@@ -62,9 +64,9 @@ https://github.com/feuerbach/regex-applicative/wiki/Examples
 
 https://www.lrde.epita.fr/~tiger/tiger.html#Syntactic-Specifications
 
-Possible approaches for Haskell:
+Possible approaches for Haskell are:
 
-### Platform way:
+### Platform way, traditional approach:
 
 https://www.haskell.org/happy/
 
@@ -75,12 +77,40 @@ Since Tiger grammar suites LL(k) form we can use them:
 
 http://dev.stephendiehl.com/fun/002_parsers.html
 
+http://www.stephendiehl.com/llvm/#parser-combinators
 
-### Earley Parsing (very tempting):
+Some hints on choice between major parsing libraries can be found here --  https://typeclasses.com/parsing
+
+
+### Earley Parsing:
 
 http://hackage.haskell.org/package/Earley-0.12.0.0/docs/Text-Earley.html
 
 http://loup-vaillant.fr/tutorials/earley-parsing/
+
+
+### Parsing based on Brzozowski's derivatives
+
+The initial idea:
+
+*Derivatives of Regular Expressions, Janusz Brzozowski, Journal of the ACM 1964*
+
+Good talk on the topic: https://www.youtube.com/watch?v=QVdBPvOOjBA
+
+Derivatives in parsing context:
+
+*Matthew Might and David Darais. Yacc is dead. CoRR, abs/1010.5023, 2010*
+
+*Matthew Might, David Darais, and Daniel Spiewak. Parsing with derivatives: A functional pearl. SIGPLAN Not., 46(9):189–195, September 2011.*
+
+More links and some history here: http://matt.might.net/articles/parsing-with-derivatives/
+
+Realisation: http://hackage.haskell.org/package/derp
+
+
+### Which one to take?
+
+Most haskell realisations nowadays use Happy or parser combinators approach, which can be considered mainstream nowadays. This repo uses megaparsec (though unconventional approaches are very tempting)
 
 
 ## Nix notes

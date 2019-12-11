@@ -14,8 +14,18 @@ import Language.Lexer.Applicative
 import Data.Char (isSpace, isDigit, isLetter, isAlphaNum)
 import Data.List
 
+
+import Text.Megaparsec
+
 import Tokens
 import Lexer
+
+-- input = [TokenInt]
+
+-- main = do
+--     parseTest pr input
+
+-- pr = undefined
 
 test :: IO ()
 test = do
